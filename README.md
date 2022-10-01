@@ -41,6 +41,8 @@
 
   ## Usage
 
+  Video Walkthrough Link: https://drive.google.com/file/d/1sjO0EtAYuT3msxllkdyJFq51_ejoHU0o/view?usp=sharing
+
   ![Example use of application](./images/applicationExample.png)
 
   ## Contributing

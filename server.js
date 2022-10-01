@@ -15,6 +15,7 @@ const db = mysql.createConnection(
     console.log(`Connected to the employee_db database.`)
 );
 
+// The normal prompt that generates the questions for the user
 const promptUser = () => {
     inquirer.prompt([
         {
@@ -33,6 +34,7 @@ const promptUser = () => {
             ]
         }
     ])
+    // Goes over the answer given from prompt and then sends to given function
     .then((answers) => {
         const {choices} = answers;
 
@@ -70,6 +72,7 @@ const promptUser = () => {
     });
 };
 
+//Views all Departments
 const viewAllDepartments = () => {
     console.log(``);
     db.query('SELECT * FROM department', function (err, results) {
@@ -82,6 +85,7 @@ const viewAllDepartments = () => {
     });
 };
 
+// Views all Role
 const viewAllRoles = () => {
     console.log(``);
     db.query(
@@ -99,6 +103,7 @@ const viewAllRoles = () => {
     });
 };
 
+// Views all Employees
 const viewAllEmployees = () => {
     console.log(``);
     db.query(
@@ -118,6 +123,7 @@ const viewAllEmployees = () => {
     });
 };
 
+// Adds department
 const addADepartment = () => {
     inquirer.prompt([
         {
@@ -140,11 +146,13 @@ const addADepartment = () => {
     });
 };
 
+// Add a new role
 const addARole = () => {
     db.query('SELECT * FROM department', function (err, results) {
         if (err) {
             console.log(err);
         } else {
+            // allows user to select any of the departments in the database
             let departmentNamesArray = [];
             results.forEach((department) => {
                 departmentNamesArray.push(department.name);
@@ -174,12 +182,14 @@ const addARole = () => {
                 let choice = answers.departmentChoice;
                 let department_id;
 
+                // checks if department chosen is the same as the department in the database and the connects its "id"
                 results.forEach((department) => {
                     if (choice === department.name) {
                         department_id = department.id;
                     }
                 });
 
+                // Inserts in data to create new role
                 let sql = 'INSERT INTO roles (title, salary, department_id) values (?, ?, ?)';
                 let parameters = [newRole, newSalary, department_id]
 
@@ -196,11 +206,13 @@ const addARole = () => {
     });
 }
 
+// Adds a new Employee
 const addAnEmployee = () => {
     db.query('SELECT * FROM roles', function (err, results) {
         if (err) {
             console.log(err);
         } else {
+            // allows user to chose from any role in the Database
             let roleArray = [];
             results.forEach((roles) => {
                 roleArray.push(roles.title);
@@ -231,6 +243,7 @@ const addAnEmployee = () => {
                 let choice = answer.roleChoice;
                 let roles_id;
 
+                // Checks if choice is equal to a role in the roles table and then assigns id equal to variable
                 results.forEach((roles) => {
                     if (choice === roles.title) {
                         roles_id = roles.id;
@@ -256,12 +269,14 @@ const addAnEmployee = () => {
                         .then(theManager => {
                             let newManager;
                             const manager = theManager.manager;
+                            // allows user to select none and if selected will output in mysql as "null"
                             if (manager === 'none') {
                                 newManager = null;
                             } else {
                                 newManager = manager;
                             }
 
+                            // inserts data into new employee
                             parameters.push(newManager);
                             const sql =   `INSERT INTO employee (first_name, last_name, roles_id, manager_id)
                                         VALUES (?, ?, ?, ?)`;
@@ -277,6 +292,7 @@ const addAnEmployee = () => {
     }
 )};
 
+// Updated an exisiting employee's role
 const updateAnEmployeeRole = () => {
     let updateEmployeeSQL = `SELECT e.id, e.first_name, e.last_name, roles.title
         FROM employee e
@@ -286,6 +302,7 @@ const updateAnEmployeeRole = () => {
         if (err) {
             console.log(err);
         } else {
+            // allows user to select employees from the employee table
             let employeeArray = [];
             response.forEach((employee) => {
                 employeeArray.push(`${employee.first_name} ${employee.last_name}`);
@@ -296,6 +313,7 @@ const updateAnEmployeeRole = () => {
                 if (err) {
                     console.log(err);
                 } else {
+                    // allows user to select roles from the roles table
                     let rolesArray = [];
                     results.forEach((roles) => {
                         rolesArray.push(roles.title);
@@ -321,11 +339,14 @@ const updateAnEmployeeRole = () => {
                         let employeeID;
                         let roleID;
 
+                        // sets selected employee if equal to one in the table to that corresponding "id"
                         response.forEach((employee) => {
                             if (selectEmployee === `${employee.first_name} ${employee.last_name}`) {
                                 employeeID = employee.id;
                             }
                         });
+
+                        // sets selected role if equal to one in the table to that corresponding "id"
                         results.forEach((roles) => {
                             if (selectNewRole === roles.title) {
                                 roleID = roles.id;
@@ -335,6 +356,7 @@ const updateAnEmployeeRole = () => {
                         let parameters = [roleID];
                         parameters.push(employeeID);
 
+                        // updated data into employee table
                         let updatedEmployeeSQL =
                             `UPDATE employee SET employee.roles_id = ? WHERE employee.id = ?`;
                         db.query(updatedEmployeeSQL, parameters, (error) => {
